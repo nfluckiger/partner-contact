@@ -9,7 +9,7 @@
     "license": "AGPL-3",
     "website": "https://github.com/OCA/partner-contact",
     "depends": ["base"],
-    "data": ["cron/update_cron.xml", "views/smart_tagger_view.xml"],
+    "data": ["cron/update_cron.xml", "views/smart_tagger_view.xml", "views/res_partner_category_view_extension.xml"],
     "installable": True,
     "auto_install": False,
 }
