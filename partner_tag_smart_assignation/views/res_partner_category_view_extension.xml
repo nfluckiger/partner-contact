@@ -8,7 +8,7 @@
                 <field name="author_of_the_tag"/>
                 <field name="department_that_uses_the_tag"/>
                 <field name="description_of_the_tag"/>
-                <field name="is_unlimited_tag"/>
+                <field name="valid_until"/>
             </xpath>
         </field>
     </record>
@@ -22,7 +22,7 @@
                 <field name="author_of_the_tag"/>
                 <field name="department_that_uses_the_tag"/>
                 <field name="description_of_the_tag"/>
-                <field name="is_unlimited_tag"/>
+                <field name="valid_until"/>
             </xpath>
         </field>
     </record>
