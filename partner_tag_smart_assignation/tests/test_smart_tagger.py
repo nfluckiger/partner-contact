@@ -1,9 +1,8 @@
 import logging
+from datetime import timedelta
 
 from odoo import fields
 from odoo.tests.common import SavepointCase
-from datetime import timedelta
-
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +54,10 @@ class TestSmartTagger(SavepointCase):
                 "active": True,
                 "smart": True,
                 "parent_id": False,
+                "author_id": False,
+                "department_ids": False,
+                "description": "",
+                "valid_until": fields.Date.today(),
                 "tag_filter_partner_field": "partner_id",
                 "tag_filter_condition_id": self.create_condition().id,
             }
@@ -131,34 +134,28 @@ class TestSmartTagger(SavepointCase):
         # Create a new tag with a 'valid_until' date set to yesterday
         yesterday = fields.Date.to_string(fields.Date.today() - timedelta(days=1))
 
-        expired_tag = self.env["res.partner.category"].create(
-            {
-                "name": "Expired Tag",
-                "active": True,
-                "valid_until": yesterday,
-            }
-        )
+        expired_tag = self.create_tag()
+        expired_tag.update({"valid_until": yesterday})
+        expired_tag.update_partner_tags()
 
-        # Create a new tag with a 'valid_until' date set to tomorrow
+        # Reload the tags from the database
+        expired_tag.invalidate_cache()
+
+        # Check that the expired tag is now inactive
+        self.assertFalse(expired_tag.active)
+        # Check that the partner aren't tagged
+        self.assertFalse(self.david_simpson in expired_tag.partner_ids)
+
+        # Modify the tag with a 'valid_until' date set to tomorrow
         tomorrow = fields.Date.to_string(fields.Date.today() + timedelta(days=1))
-
-        active_tag = self.env["res.partner.category"].create(
-            {
-                "name": "Active Tag",
-                "active": True,
-                "valid_until": tomorrow,
-            }
-        )
+        active_tag = expired_tag
+        active_tag.update({"valid_until": tomorrow, "active": True})
 
         # Run the method which is supposed to deactivate expired tags
         self.env["res.partner.category"]._check_validity_dates()
 
         # Reload the tags from the database
-        expired_tag.invalidate_cache()
         active_tag.invalidate_cache()
-
-        # Check that the expired tag is now inactive
-        self.assertFalse(expired_tag.active)
 
         # Check that the active tag is still active
         self.assertTrue(active_tag.active)
